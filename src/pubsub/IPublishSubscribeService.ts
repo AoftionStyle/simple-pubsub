@@ -1,4 +1,4 @@
-import { IEvent } from "../../event/IEvent";
+import { IEvent } from "./IEvent";
 import { ISubscriber } from "./ISubscriber";
 
 
