@@ -4,8 +4,7 @@ import { ISubscriber } from "./ISubscriber";
 
 export interface IPublishSubscribeService {
   publish(event: IEvent): void;
-  // subscribe(type: string, handler: ISubscriber): void;
-  subscribe(handler: ISubscriber): void;
+  subscribe(type: string, handler: ISubscriber): void;
   // unsubscribe ( /* Question 2 - build this feature */ );
-  unsubscribe(event: IEvent): void;
+  unsubscribe(type: string): void;
 }
