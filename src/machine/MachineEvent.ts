@@ -1,6 +1,7 @@
-import { IEvent } from "../pubsub/IEvent";
+import { IEvent } from "../utils/pubsub/IEvent";
 
-// implementations
+type MachineEventType = 'sale' | 'refill' | 'stockWarning';
+
 export class MachineSaleEvent implements IEvent {
   constructor(private readonly _sold: number, private readonly _machineId: string) {}
 
@@ -12,7 +13,7 @@ export class MachineSaleEvent implements IEvent {
     return this._sold
   }
 
-  type(): string {
+  type(): MachineEventType {
     return 'sale';
   }
 }
@@ -31,7 +32,7 @@ export class MachineRefillEvent implements IEvent {
     return this._refill;
   }
 
-  type(): string {
+  type(): MachineEventType {
     return 'refill';
   }
 }
