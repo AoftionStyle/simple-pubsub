@@ -31,6 +31,7 @@ export class MachineRefillSubscriber extends MachineSubscriber {
   }
 }
 
+const WARNING_THREADSHOLD: number = 3;
 /**
  * create class StockWarningSubscriber
  * handle(event: IEvent) covered by MachineSaleEvent and MahcineRefillEvent
@@ -40,9 +41,9 @@ export class MachineStockWarningSubscriber extends MachineSubscriber {
   // when the stock levels hits 3 or above (because of a MachineRefillEvent), a StockLevelOkEvent should be generated.
   // overriding super class method
   public handle(event: IEvent): void {
-    if (event instanceof MachineRefillEvent && this.machines[Number(event.machineId())].stockLevel >= 3) {
+    if (event instanceof MachineRefillEvent && this.machines[Number(event.machineId())].stockLevel >= WARNING_THREADSHOLD) {
       this.machines[Number(event.machineId())].stockStatus = 'StockLevelOkEvent';
-    } else if (this.machines[Number(event.machineId())].stockLevel < 3) {
+    } else if (this.machines[Number(event.machineId())].stockLevel < WARNING_THREADSHOLD) {
       this.machines[Number(event.machineId())].stockStatus = 'LowStockWarningEvent';
     }
   }
