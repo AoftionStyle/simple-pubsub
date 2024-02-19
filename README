@@ -27,6 +27,7 @@ The instructions still placed [here](./instruction/INSTRUCTION.md).
     - This allows for easier testing and flexibility in changing the implementation of dependencies.
 
 3. **Separation of Concerns**
+    - The code using package by feature as separated directory to src/machine and src/utils.
     - The code separates different concerns into distinct classes and interfaces.
     - Event handling, subscribers, and the publish/subscribe service are separated, making the code more modular and easier to maintain.
 
