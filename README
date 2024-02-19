@@ -1,20 +1,39 @@
-Instructions
-1. Build the Publish-Subscribe mechanism. Allow ISubscriber objects to register against an concrete IPublishSubscribeService object for an event type. Implement the publish method so that when a publish event occurs, all subscribers of that the event type published will have a chance to handle the event. The subscribers should be working off a shared array of Machine objects, mutating them depending on the event received.
-2. Now add the method 'unsubscribe' on IPublishSubscribeService to allow handlers to unsubscribe from events. You may change the existing method signatures.
-3. Implement MachineRefillSubscriber. It will increase the stock quantity of the machine.
-4. Let's add some new behaviour. If a machine stock levels drops below 3 a new Event, LowStockWarningEvent should be generated. When the stock levels hits 3 or above (because of a MachineRefillEvent), a StockLevelOkEvent should be generated.  For each machine, LowStockWarningEvent or StockLevelOkEvent should only fire one time when crossing the threshold of 3. You may want to introduce new subscribers (e.g. a new subscriber called StockWarningSubscriber). In fact you may change anything as long as the task is performed and you can justify your reasonings. Remember subscribers should be notified in the order that the events occured.
+# PubSub Solution
 
-Your program should now allow you to create ISubscriber objects, register them using your IPublishSubscribService implementation. You can then create IEvent objects and call your IPublishSubscribService's implementations .publish() method. All handlers subscribed should have their 'handle' methods invoked.
+### This README represent idea of solution to pubsub assignement.
+The instructions still placed [here](./instruction/INSTRUCTION.md).
 
-Note I: Handlers can also create new events, if desired. The events would get handled after all existing events are handled.
+#### Following, Class Diagram represent pubsub project design, then we could see dependency and aggregation for each class
+## Class Diagram
+![PubSub Class Diagram](./diagram/Taobin-pubsub-class-diagram.png)
+***Remark**: the blue text meaning add/edit to class or method*
 
-Note II: If a subscriber subscribes after an event has already been published and consumed, they will not receive that event.
+#### From Class Diagram we can brought concepts in software engineerig as below.
 
-You may make any changes to this codebase as long as you ultimately build a Pub-Sub application capable of handling the existing machine sale and refill events.
+1. **SOLID**
+    - **Single Responsibility Principle (SRP)**: Each class and interface has a single responsibility. For example, the ***IEvent interface*** defines the structure of an ***event***, the ***ISubscriber interface*** defines the structure of a ***subscriber***, and the ***IPublishSubscribeService interface*** defines the methods for ***publishing, subscribing, and unsubscribing*** to events.
 
-Additional credit for using useful abstractions that add to the codebase. This is fairly general, and is here for you to demonstrate your knowledge. Some examples might be 
-(i) using a repository for storing Machines and injecting them into events subscriber
-(ii) using advanced functional concepts like an Maybe
-(iii) and more
+    - **Open/Closed Principle (OCP)**: The code is designed to be open for extension but closed for modification. For example, new event types (e.g., ***MachineSaleEvent, MachineRefillEvent***) can be added without modifying existing code.
 
-Please share your work using a GitHub repository with @proftom and @Gnoyoyo.
+    - **Liskov Substitution Principle (LSP)**: Subclasses (***MachineSaleEvent, MachineRefillEvent***) can be substituted for their base class (***IEvent***) without affecting the behavior of the program.
+
+    - **Interface Segregation Principle (ISP)**: Interfaces (***IPublishSubscribeService, IMachinePublishSubscribeService***) are ***segregated into smaller***, more specific interfaces, each serving a different purpose.
+
+    - **Dependency Inversion Principle (DIP)**: High-level modules (e.g., ***MachinePublishSubscribeService***) depend on abstractions (e.g., ***IPublishSubscribeService***, ***ISubscriber***), rather than concrete implementations.
+
+2. **Dependency Injection**
+    - The code demonstrates dependency injection in the ***MachineSubscriber class constructor***, which receives an array of Machine objects.
+    - This allows for easier testing and flexibility in changing the implementation of dependencies.
+
+3. **Separation of Concerns**
+    - The code separates different concerns into distinct classes and interfaces.
+    - Event handling, subscribers, and the publish/subscribe service are separated, making the code more modular and easier to maintain.
+
+4. **Test-Driven Development (TDD)**
+    - The design of the code, especially the separation of concerns and use of interfaces, can facilitate writing testable code.
+    - However, the code does not include tests, so it does not directly demonstrate TDD.
+
+## Flowchart Diagram
+![PubSub Flowchart Diagram](./diagram/Taobin-pubsub-flowchart.png)
+
+#### Present logical program running process from start to end
