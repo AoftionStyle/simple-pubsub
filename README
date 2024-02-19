@@ -5,7 +5,7 @@ The instructions still placed [here](./instruction/INSTRUCTION.md).
 
 #### Following, Class Diagram represent pubsub project design, then we could see dependency and aggregation for each class
 ## Class Diagram
-![PubSub Class Diagram](./diagram/Taobin-pubsub-class-diagram.png)
+![PubSub Class Diagram](diagram/Taobin-pubsub-class-diagram.png)
 ***Remark**: the blue text meaning add/edit to class or method*
 
 #### From Class Diagram we can brought concepts in software engineerig as below.
@@ -34,6 +34,6 @@ The instructions still placed [here](./instruction/INSTRUCTION.md).
     - However, the code does not include tests, so it does not directly demonstrate TDD.
 
 ## Flowchart Diagram
-![PubSub Flowchart Diagram](./diagram/Taobin-pubsub-flowchart.png)
+![PubSub Flowchart Diagram](diagram/Taobin-pubsub-flowchart.png)
 
 #### Present logical program running process from start to end
