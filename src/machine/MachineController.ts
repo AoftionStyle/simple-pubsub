@@ -2,7 +2,7 @@ import { Machine } from "./Machine";
 import { MachineRefillEvent, MachineSaleEvent } from "./MachineEvent";
 import { MachineEventGenerator } from "./MachineEventGenerator";
 import { IMachinePublishSubscribeService, MachinePublishSubscribeService } from "./MachinePublishSubscribeService";
-import { MachineRefillSubscriber, MachineSaleSubscriber, MachineStockWarningSubscriber } from "./MachineSubscriber";
+import { MachineRefillSubscriber, MachineSaleSubscriber, MachineStockWarningSubscriber, MachineSubscriber } from "./MachineSubscriber";
 
 
 export class MachineController {
@@ -17,9 +17,9 @@ export class MachineController {
     const machines: Machine[] = [new Machine('000'), new Machine('001'), new Machine('002'), new Machine('003')];
 
     // create a machine event subscriber. inject the machines (all subscribers should do this)
-    const saleSubscriber = new MachineSaleSubscriber(machines);
-    const refillSubscriber = new MachineRefillSubscriber(machines);
-    const stockWarningSubscriber = new MachineStockWarningSubscriber(machines);
+    const saleSubscriber: MachineSubscriber = new MachineSaleSubscriber(machines);
+    const refillSubscriber: MachineSubscriber = new MachineRefillSubscriber(machines);
+    const stockWarningSubscriber: MachineSubscriber = new MachineStockWarningSubscriber(machines);
 
     // create the PubSub service
     const pubSubService: IMachinePublishSubscribeService = new MachinePublishSubscribeService(machines);
