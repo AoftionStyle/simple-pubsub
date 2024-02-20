@@ -2,15 +2,27 @@ import { IEvent } from "../utils/pubsub/IEvent";
 
 type MachineEventType = 'sale' | 'refill' | 'stockWarning';
 
-export class MachineSaleEvent implements IEvent {
-  constructor(private readonly _sold: number, private readonly _machineId: string) {}
+export abstract class MachineEvent implements IEvent {
+  constructor (protected readonly _quantity: number, protected readonly _machineId: string) {}
 
+  type(): string {
+    throw new Error("Method not implemented.");
+  }
   machineId(): string {
     return this._machineId;
   }
+  getQuantity(): number {
+    return this._quantity;
+  }
+}
+
+export class MachineSaleEvent extends MachineEvent {
+  constructor(protected readonly _sold: number, protected readonly _machineId: string) {
+    super(_sold, _machineId);
+  }
 
   getSoldQuantity(): number {
-    return this._sold
+    return this.getQuantity();
   }
 
   type(): MachineEventType {
@@ -21,11 +33,9 @@ export class MachineSaleEvent implements IEvent {
 // update machineId() when return _mahcineId from constructor
 // add getRefillQuantity() when return _refill from constructor
 // update type when return 'refill';
-export class MachineRefillEvent implements IEvent {
-  constructor(private readonly _refill: number, private readonly _machineId: string) {}
-
-  machineId(): string {
-    return this._machineId;
+export class MachineRefillEvent extends MachineEvent {
+  constructor(protected readonly _refill: number, protected readonly _machineId: string) {
+    super(_refill, _machineId);
   }
 
   getRefillQuantity(): number {
