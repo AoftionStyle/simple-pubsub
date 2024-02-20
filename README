@@ -33,7 +33,7 @@ The instructions still placed [here](./instruction/INSTRUCTION.md).
 
 4. **Test-Driven Development (TDD)**
     - The design of the code, especially the separation of concerns and use of interfaces, can facilitate writing testable code.
-    - However, the code does not include tests, so it does not directly demonstrate TDD.
+    - However, the code does not include tests on master's branch, during experiment on jestUnit's branch so it does not directly demonstrate TDD.
 
 ## Flowchart Diagram
 [PubSub Flowchart Diagram](/diagram/Taobin-pubsub-flowchart.png)
