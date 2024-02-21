@@ -1,4 +1,5 @@
 import { Machine } from "../../../src/machine/Machine";
+import { MachineEvent, MachineRefillEvent, MachineSaleEvent } from "../../../src/machine/MachineEvent";
 import { EventSubscriber, IMachinePublishSubscribeService, MachinePublishSubscribeService } from "../../../src/machine/MachinePublishSubscribeService";
 import { MachineSaleSubscriber, MachineSubscriber } from "../../../src/machine/MachineSubscriber";
 import { IEvent } from "../../../src/utils/pubsub/IEvent";
@@ -33,6 +34,15 @@ describe('MachinePublishSubscribeService', () => {
     expect(subscribers).toEqual(pubSubService.getSubscribers());
   });
 
+  it('should unsubscribe from event', () => {
+    const eventType = 'sale';
+    const subscriber: MachineSubscriber = new MachineSaleSubscriber(machines);
+
+    pubSubService.subscribe(eventType, subscriber);
+    pubSubService.unsubscribe(eventType);
+    expect(pubSubService.getSubscribers()[eventType]).toBeUndefined();
+  });
+
   it('should handle the case where the subscriber for event type is defined', () => {
     const eventType = 'sale';
     const event: IEvent = { type: () => eventType, machineId: () => '001' };
@@ -58,12 +68,44 @@ describe('MachinePublishSubscribeService', () => {
     expect(() => pubSubService.publish(event)).not.toThrow();
   });
 
-  it('should unsubscribe from event', () => {
-    const eventType = 'sale';
-    const subscriber: MachineSubscriber = new MachineSaleSubscriber(machines);
+  it('should handle the subscribers for "sale" and "refill" events to a mahcine and return stockstockStatus is "StockLevelOkEvent"', () => {
+    const events: MachineEvent[] = [
+      new MachineSaleEvent(2, '001'), 
+      new MachineSaleEvent(2, '001'), 
+      new MachineSaleEvent(2, '001'), 
+      new MachineRefillEvent(5, '001'),
+      new MachineSaleEvent(2, '001'), 
+    ];
+    const saleSubscriber: ISubscriber = { handle: jest.fn() };
+    const refillSubscriber: ISubscriber = { handle: jest.fn() };
+    const stockWarningSubscriber: ISubscriber = { handle: jest.fn() };
 
-    pubSubService.subscribe(eventType, subscriber);
-    pubSubService.unsubscribe(eventType);
-    expect(pubSubService.getSubscribers()[eventType]).toBeUndefined();
+    pubSubService.subscribe('sale', saleSubscriber);
+    pubSubService.subscribe('refill', refillSubscriber);
+    pubSubService.subscribe('stockWarning', stockWarningSubscriber);
+
+    // publish the events
+    for(let event of events) {
+      pubSubService.publish(event);
+    }
+
+    // behaviors saleSubscriber
+    expect(saleSubscriber.handle).toHaveBeenCalledTimes(4);
+    expect(saleSubscriber.handle).toHaveBeenCalledWith(events[0]);
+    expect(saleSubscriber.handle).toHaveBeenCalledWith(events[1]);
+    expect(saleSubscriber.handle).toHaveBeenCalledWith(events[2]);
+    expect(saleSubscriber.handle).toHaveBeenCalledWith(events[4]);
+
+    // behaviors refillSubscriber
+    expect(refillSubscriber.handle).toHaveBeenCalledTimes(1);
+    expect(refillSubscriber.handle).toHaveBeenCalledWith(events[3]);
+
+    // behaviors stockWarningSubscriber
+    expect(stockWarningSubscriber.handle).toHaveBeenCalledTimes(5);
+    expect(stockWarningSubscriber.handle).toHaveBeenCalledWith(events[0]);
+    expect(stockWarningSubscriber.handle).toHaveBeenCalledWith(events[1]);
+    expect(stockWarningSubscriber.handle).toHaveBeenCalledWith(events[2]);
+    expect(stockWarningSubscriber.handle).toHaveBeenCalledWith(events[3]);
+    expect(stockWarningSubscriber.handle).toHaveBeenCalledWith(events[4]);
   });
 });
