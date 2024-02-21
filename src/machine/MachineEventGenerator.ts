@@ -2,7 +2,7 @@ import { IEvent } from "../utils/pubsub/IEvent";
 import { MachineRefillEvent, MachineSaleEvent } from "./MachineEvent";
 
 export class MachineEventGenerator {
-  eventGenerator(): IEvent {
+  static eventGenerator(): IEvent {
     const random = Math.random();
     if (random < 0.5) {
       const saleQty = Math.random() < 0.5 ? 1 : 2; // 1 or 2
@@ -12,7 +12,7 @@ export class MachineEventGenerator {
     return new MachineRefillEvent(refillQty, this.randomMachine());
   };
 
-  private randomMachine(): string {
+  private static randomMachine(): string {
     const random = Math.random() * 3;
     if (random < 1) {
       return '001';
@@ -20,6 +20,5 @@ export class MachineEventGenerator {
       return '002';
     }
     return '003';
-  
   };
 }
