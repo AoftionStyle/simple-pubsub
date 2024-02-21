@@ -1,7 +1,7 @@
 import { Machine } from "../../../src/machine/Machine";
 import { MachineEvent, MachineRefillEvent, MachineSaleEvent } from "../../../src/machine/MachineEvent";
 import { EventSubscriber, IMachinePublishSubscribeService, MachinePublishSubscribeService } from "../../../src/machine/MachinePublishSubscribeService";
-import { MachineSaleSubscriber, MachineSubscriber } from "../../../src/machine/MachineSubscriber";
+import { MachineRefillSubscriber, MachineSaleSubscriber, MachineStockWarningSubscriber, MachineSubscriber } from "../../../src/machine/MachineSubscriber";
 import { IEvent } from "../../../src/utils/pubsub/IEvent";
 import { ISubscriber } from "../../../src/utils/pubsub/ISubscriber";
 
@@ -68,7 +68,7 @@ describe('MachinePublishSubscribeService', () => {
     expect(() => pubSubService.publish(event)).not.toThrow();
   });
 
-  it('should handle the subscribers for "sale" and "refill" events to a mahcine and return stockstockStatus is "StockLevelOkEvent"', () => {
+  it('should handle the subscribers for "sale" and "refill" events to a mahcine', () => {
     const events: MachineEvent[] = [
       new MachineSaleEvent(2, '001'), 
       new MachineSaleEvent(2, '001'), 
@@ -94,11 +94,16 @@ describe('MachinePublishSubscribeService', () => {
     expect(saleSubscriber.handle).toHaveBeenCalledWith(events[0]);
     expect(saleSubscriber.handle).toHaveBeenCalledWith(events[1]);
     expect(saleSubscriber.handle).toHaveBeenCalledWith(events[2]);
+    expect(saleSubscriber.handle).not.toHaveBeenCalledWith(events[3]);
     expect(saleSubscriber.handle).toHaveBeenCalledWith(events[4]);
 
     // behaviors refillSubscriber
     expect(refillSubscriber.handle).toHaveBeenCalledTimes(1);
+    expect(refillSubscriber.handle).not.toHaveBeenCalledWith(events[0]);
+    expect(refillSubscriber.handle).not.toHaveBeenCalledWith(events[1]);
+    expect(refillSubscriber.handle).not.toHaveBeenCalledWith(events[2]);
     expect(refillSubscriber.handle).toHaveBeenCalledWith(events[3]);
+    expect(refillSubscriber.handle).not.toHaveBeenCalledWith(events[4]);
 
     // behaviors stockWarningSubscriber
     expect(stockWarningSubscriber.handle).toHaveBeenCalledTimes(5);
@@ -107,5 +112,55 @@ describe('MachinePublishSubscribeService', () => {
     expect(stockWarningSubscriber.handle).toHaveBeenCalledWith(events[2]);
     expect(stockWarningSubscriber.handle).toHaveBeenCalledWith(events[3]);
     expect(stockWarningSubscriber.handle).toHaveBeenCalledWith(events[4]);
+  });
+
+  it('should handle the subscribers for "sale" events to a mahcine and stockLevele & stockStatus', () => {
+    const events: MachineEvent[] = [
+      new MachineSaleEvent(2, '001'), 
+      new MachineSaleEvent(2, '001'), 
+      new MachineSaleEvent(2, '001'), 
+      // new MachineRefillEvent(5, '001'),
+      new MachineSaleEvent(2, '001'), 
+    ];
+    const saleSubscriber: ISubscriber = new MachineSaleSubscriber(machines);
+    const refillSubscriber: ISubscriber = new MachineRefillSubscriber(machines);
+    const stockWarningSubscriber: ISubscriber = new MachineStockWarningSubscriber(machines);
+
+    pubSubService.subscribe('sale', saleSubscriber);
+    pubSubService.subscribe('refill', refillSubscriber);
+    pubSubService.subscribe('stockWarning', stockWarningSubscriber);
+
+    // publish the events
+    for(let event of events) {
+      pubSubService.publish(event);
+    }
+
+    expect(machines[Number('001')].stockLevel).toEqual(2);
+    expect(machines[Number('001')].stockStatus).toEqual('LowStockWarningEvent');
+  });
+
+  it('should handle the subscribers for "sale" and "refill" events to a mahcine and stockLevele & stockStatus', () => {
+    const events: MachineEvent[] = [
+      new MachineSaleEvent(2, '001'), 
+      new MachineSaleEvent(2, '001'), 
+      new MachineSaleEvent(2, '001'), 
+      new MachineRefillEvent(5, '001'),
+      new MachineSaleEvent(2, '001'), 
+    ];
+    const saleSubscriber: ISubscriber = new MachineSaleSubscriber(machines);
+    const refillSubscriber: ISubscriber = new MachineRefillSubscriber(machines);
+    const stockWarningSubscriber: ISubscriber = new MachineStockWarningSubscriber(machines);
+
+    pubSubService.subscribe('sale', saleSubscriber);
+    pubSubService.subscribe('refill', refillSubscriber);
+    pubSubService.subscribe('stockWarning', stockWarningSubscriber);
+
+    // publish the events
+    for(let event of events) {
+      pubSubService.publish(event);
+    }
+
+    expect(machines[Number('001')].stockLevel).toEqual(7);
+    expect(machines[Number('001')].stockStatus).toEqual('StockLevelOkEvent');
   });
 });
