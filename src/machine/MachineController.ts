@@ -1,48 +1,42 @@
+import { IEvent } from "../utils/pubsub/IEvent";
 import { Machine } from "./Machine";
 import { MachineRefillEvent, MachineSaleEvent } from "./MachineEvent";
 import { MachineEventGenerator } from "./MachineEventGenerator";
-import { IMachinePublishSubscribeService, MachinePublishSubscribeService } from "./MachinePublishSubscribeService";
+import { IMachinePublishSubscribeService } from "./MachinePublishSubscribeService";
 import { MachineRefillSubscriber, MachineSaleSubscriber, MachineStockWarningSubscriber, MachineSubscriber } from "./MachineSubscriber";
 
 
 export class MachineController {
+  constructor(private machines: Machine[], private pubSubService: IMachinePublishSubscribeService) {}
+
   service(): void {
-    // create 5 random events
-    const machineEventGenerator: MachineEventGenerator = new MachineEventGenerator();
-    const events = [1, 2, 3, 4, 5].map(i => machineEventGenerator.eventGenerator());
-    console.log("Machine Controller events size:", events);
-
-    // Create 3 machines with a quantity of 10 stock.
-    // id '000' reserved index
-    const machines: Machine[] = [new Machine('000'), new Machine('001'), new Machine('002'), new Machine('003')];
-
     // create a machine event subscriber. inject the machines (all subscribers should do this)
-    const saleSubscriber: MachineSubscriber = new MachineSaleSubscriber(machines);
-    const refillSubscriber: MachineSubscriber = new MachineRefillSubscriber(machines);
-    const stockWarningSubscriber: MachineSubscriber = new MachineStockWarningSubscriber(machines);
+    const saleSubscriber: MachineSubscriber = new MachineSaleSubscriber(this.machines);
+    const refillSubscriber: MachineSubscriber = new MachineRefillSubscriber(this.machines);
+    const stockWarningSubscriber: MachineSubscriber = new MachineStockWarningSubscriber(this.machines);
 
-    // create the PubSub service
-    const pubSubService: IMachinePublishSubscribeService = new MachinePublishSubscribeService(machines);
-
-    console.log("before subscribe:", pubSubService.getSubscribers());
+    // create 5 random events
+    const events: IEvent[] = [1, 2, 3, 4, 5].map(i => MachineEventGenerator.eventGenerator());
+    console.log("events size:", events);
+    console.log("before subscribe:", this.pubSubService.getSubscribers());
     for(let event of events) {
       const eventType = event.type();
       if (event instanceof MachineSaleEvent) {
-        pubSubService.subscribe(eventType, saleSubscriber);
+        this.pubSubService.subscribe(eventType, saleSubscriber);
       } else if (event instanceof MachineRefillEvent) {
-        pubSubService.subscribe(eventType, refillSubscriber);
+        this.pubSubService.subscribe(eventType, refillSubscriber);
       }
-      pubSubService.subscribe('stockWarning', stockWarningSubscriber);
+      this.pubSubService.subscribe('stockWarning', stockWarningSubscriber);
     };
-    console.log("after subscribe:", pubSubService.getSubscribers());
+    console.log("after subscribe:", this.pubSubService.getSubscribers());
 
-    console.log("before mahcines:", machines);
+    console.log("before mahcines:", this.machines);
 
     // publish the events
     for(let event of events) {
-      pubSubService.publish(event);
+      this.pubSubService.publish(event);
     }
 
-    console.log("after mahcines:", machines);
+    console.log("after mahcines:", this.machines);
   }
 }
